@@ -46,22 +46,32 @@ const user_schema = mongoose.Schema({
   school: {type: String, required: true},
 });
 const user = mongoose.model('User', user_schema);
+const user_query = (q) => {
+  return user.findOne({
+    name: q.name,
+    email: q.email,
+    school: q.school
+  })
+}
 
 app.post('/', (req, res) => {
   var body = req.body
-  var temp = new user( {
-    name: body.name,
-    email: body.email,
-    school: body.school
-  })
-  console.log(temp)
-  // res.send('it went through')
-  temp.save((err) => {
+  var temp = new user(body)
+  user_query(body).exec((err, data) => {
     if (err) {
-      throw err;
+      throw err
     }
-    console.log('registered user', temp);
-    res.send('it went through')
+    if (!data) {
+      temp.save((err) => {
+        if (err) {
+          throw err;
+        }
+        console.log('registered user', temp);
+        res.send('saved to mLab database')
+      })
+    } else {
+      res.send('user already exists in database')
+    }
   })
 })
 
