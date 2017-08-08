@@ -1,5 +1,4 @@
 const local = require('./local_strategies.js');
-const facebook = require('./facebook_strategies.js')
 const express = require('express');
 const router = express.Router()
 
@@ -9,15 +8,6 @@ const isLoggedIn = (req, res, next) => {
   }
   res.send('unauthorized');
 };
-
-router.get('/facebook', facebook.authenticate('facebook', { scope : 'email' }));
-
-router.get('/facebook/callback',
-  facebook.authenticate('facebook', {
-    successRedirect : '/',
-    failureRedirect : '/'
-  }
-));
 
 router.post('/signin', local.authenticate('login'), (req, res) => {
   res.end();

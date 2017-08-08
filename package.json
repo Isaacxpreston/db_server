@@ -1,7 +1,7 @@
 {
-  "name": "alike.me",
+  "name": "db server",
   "version": "1.0.0",
-  "description": "Find people like you",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "node server/server.js",
