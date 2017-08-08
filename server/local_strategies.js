@@ -1,5 +1,5 @@
 const passport = require('passport');
-const User = require('../database/user_schema.js')
+const User = require('../schema/user_schema.js')
 const express = require('express');
 const LocalStrategy = require('passport-local').Strategy;
 
@@ -22,7 +22,7 @@ passport.use('login',
       'email': email
     }, (err, data) => {
       if (!data) {
-        console.log('user not found');  
+        console.log('user not found');
         return done(null, false);
       }
       if (!data.comparePassword(phone)) {
