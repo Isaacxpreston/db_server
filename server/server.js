@@ -8,9 +8,14 @@ const cookieParser = require('cookie-parser');
 const passport = require('passport')
 const passportRoute = require('./passport_router.js')
 
+
+
+//mLab connection and credentials
+var keys = require('../keys.js')
+mongoose.connect(keys.mongoose);
+
 // middleware and setup
 const app = express();
-mongoose.connect('mongodb://localhost/auth_boilerplate2');
 app.use(cookieParser());
 app.use(session({
   secret: 'secret',
@@ -25,7 +30,7 @@ app.use(bodyParser.json());
 app.use('/api', passportRoute)
 
 app.get("*", (req, res) => (
-  res.send('shut up')
+  res.send('here')
 ));
 
 const PORT = process.env.PORT || 4000
