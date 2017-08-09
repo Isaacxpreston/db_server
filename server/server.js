@@ -32,7 +32,6 @@ app.use(function(req, res, next) {
 });
 
 // routing
-
 // app.use('/api', passportRoute)
 
 app.get("*", (req, res) => (
@@ -48,9 +47,7 @@ const user_schema = mongoose.Schema({
 const user = mongoose.model('User', user_schema);
 const user_query = (q) => {
   return user.findOne({
-    name: q.name,
-    email: q.email,
-    school: q.school
+    email: q.email
   })
 }
 
@@ -70,7 +67,21 @@ app.post('/', (req, res) => {
         res.send('saved to mLab database')
       })
     } else {
-      res.send('user already exists in database')
+      //update user here
+      user.update(
+      {
+        email: body.email
+      }, 
+      {
+        name: body.name,
+        school: body.school
+      }, function (err) {
+        if (err) {
+          throw err;
+        }
+        console.log('updated user', temp);
+        res.send('updated school to mLab database')
+      })
     }
   })
 })
