@@ -1,12 +1,10 @@
 // dependencies
 const express = require('express');
 const path = require('path')
-const session = require('express-session');
+var sessions = require("client-sessions");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const passport = require('passport')
-// const passportRoute = require('./passport_router.js')
+// const cookieParser = require('cookie-parser');
 const keys = require('../keys.js')
 
 //mLab connection and credentials
@@ -14,37 +12,74 @@ mongoose.connect(keys.mongoose);
 
 // middleware and setup
 const app = express();
-app.use(cookieParser());
-app.use(session({
-  secret: 'secret',
-  resave: true,
-  saveUninitialized: true
-}));
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(cookieParser());
 app.use(bodyParser.json());
 
 // CORS fix
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access- sControl-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
-// routing
+// routing module example
 // app.use('/api', passportRoute)
+
+
+/* -- copypaste -- */
+
+// every route change, check for session and user/set user.
+app.use(function(req, res, next) {
+  if (req.session && req.session.user) {
+    User.findOne({ email: req.session.user.email }, function(err, user) {
+      if (user) {
+        req.user = user;
+        delete req.user.password; // delete the password from the session
+        req.session.user = user;  //refresh the session value
+        res.locals.user = user;
+      }
+      // finishing processing the middleware and run the route
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
+// require login
+function requireLogin (req, res, next) {
+  if (!req.user) {
+    res.redirect('/login');
+  } else {
+    next();
+  }
+};
+
+// example
+app.get('/dashboard', requireLogin, function(req, res) {
+  // res.render('dashboard.jade');
+  res.send('how did you get here')
+});
+
+/*-- end copypaste -- */
+
+
+
+
 
 app.get("*", (req, res) => (
   res.send(`it's running, yo`)
 ));
 
-// temp move later
+// temp move these later
 const user_schema = mongoose.Schema({
   name: {type: String, required: true},
   email: {type: String, required: true},
   school: {type: String, required: true},
+  password: {type: String, required: true}
 });
 const user = mongoose.model('User', user_schema);
+
 const user_query = (q) => {
   return user.findOne({
     email: q.email
@@ -63,8 +98,7 @@ app.post('/', (req, res) => {
         if (err) {
           throw err;
         }
-        console.log('registered user', temp);
-        res.send('saved to mLab database')
+        res.send(`Added new user with email '` + body.email + `' to mLab database`)
       })
     } else {
       //update user here
@@ -74,13 +108,13 @@ app.post('/', (req, res) => {
       }, 
       {
         name: body.name,
-        school: body.school
+        school: body.school,
+        password: body.password
       }, function (err) {
         if (err) {
           throw err;
         }
-        console.log('updated user', temp);
-        res.send('updated school to mLab database')
+        res.send(`Updated user with email '` + body.email + `' in mLab database`)
       })
     }
   })
